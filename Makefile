@@ -12,8 +12,6 @@ CXX		=	g++ -std=c++11
 
 CXXFLAGS	=	-I./src -I./perlinNoise -W -Wall -Wextra
 
-LDFLAGS		=	-lm
-
 all: $(NAME)
 
 $(NAME): $(OBJ)

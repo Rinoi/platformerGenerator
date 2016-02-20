@@ -8,6 +8,7 @@
 #include "Path.hpp"
 
 class World;
+class ReachArena;
 
 #define SPACE_SIZE (25)
 

@@ -60,7 +60,7 @@ void			Space::print() const
   if (this->empty == true)
     return ;
 
-  for (int y = 0; y < SPACE_SIZE; y += 1)
+  for (int y = SPACE_SIZE - 1; y >= 0 ; y -= 1)
     {
       for (int x = 0; x < SPACE_SIZE; x += 1)
 	{

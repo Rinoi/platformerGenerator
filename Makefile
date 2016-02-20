@@ -2,6 +2,7 @@ NAME		=	challenge
 
 SRC		=	src/main.cpp				\
 			src/Space.cpp				\
+			src/ReachArea.cpp			\
 			perlinNoise/bruit.cpp			\
 			perlinNoise/interpolate.cpp		\
 			perlinNoise/rand_set.cpp		\

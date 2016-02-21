@@ -10,14 +10,12 @@
 class World;
 class ReachArena;
 
-#define SPACE_SIZE (45)
-
 class Space
 {
 
 public:
 
-  Space(const t_ptn &pos);
+  Space(int w, int h);
   virtual ~Space();
 
   bool	addPath(const Path &);
@@ -29,9 +27,13 @@ public:
 private:
 
   bool	allocSpace();
+  void	freeSpace();
 
 
 public:
+
+  void			setPos(const t_ptn &ptn);
+
 
   bool			isEmpty() const;
 
@@ -39,8 +41,13 @@ public:
   const t_ptn		&getPos() const;
   const std::list<Path>	&getPathList() const;
 
+  int			getWidth() const;
+  int			getHeight() const; 
+
 private:
 
+  int			w;
+  int			h;
   t_ptn			pos;
   bool			empty;
   char			**map;

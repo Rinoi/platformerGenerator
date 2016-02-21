@@ -2,19 +2,23 @@
 
 #include "ReachArea.hpp"
 
+const double	ReachArea::noValue = -42;
+
 ReachArea::ReachArea()
 {
   this->map = NULL;
   this->empty = true;
-  this->size = 0;
+  this->h = 0;
+  this->w = 0;
 }
 
-ReachArea::ReachArea(const t_ptn &start, char **map, unsigned int size)
+ReachArea::ReachArea(const t_ptn &start, const Space &space)
 {
   this->map = NULL;
   this->empty = true;
-  this->size = 0;
-  this->creatReach(start, map, size);
+  this->h = 0;
+  this->w = 0;
+  this->creatReach(start, space);
 }
 
 ReachArea::~ReachArea()
@@ -27,7 +31,7 @@ void			ReachArea::freeMap()
   if (this->map == NULL)
     return ;
 
-  for (unsigned int y = 0; y < this->size; y += 1)
+  for (int y = 0; y < this->h; y += 1)
     delete[] (this->map[y]);
   delete[] (this->map);
   this->map = NULL;
@@ -37,14 +41,14 @@ void			ReachArea::freeMap()
 bool			ReachArea::allocMap()
 {
   this->freeMap();
-  this->map = new double *[this->size];
+  this->map = new double *[this->h];
 
-  for (unsigned int y = 0; y < this->size; y += 1)
+  for (int y = 0; y < this->h; y += 1)
     {
-      this->map[y] = new double[this->size];
+      this->map[y] = new double[this->w];
 
-      for (unsigned int x = 0; x < this->size; x += 1)
-        this->map[y][x] = -42;
+      for (int x = 0; x < this->w; x += 1)
+        this->map[y][x] = ReachArea::noValue;
     }
   return (true);
 }
@@ -54,42 +58,36 @@ void			ReachArea::print() const
   if (this->empty == true)
     return ;
 
-  for (int y = (int)(this->size) - 1; y >= 0 ; y -= 1)
+  for (int y = this->h - 1; y >= 0 ; y -= 1)
     {
-      for (unsigned int x = 0; x < this->size; x += 1)
+      for (int x = 0; x < this->w; x += 1)
         {
           char  c = ' ';
 
           if (this->mapB[y][x] != 0)
             c = 'T';
-	  if (this->map[y][x] != -42)
+	  if (this->map[y][x] != ReachArea::noValue)
 	    c = '.';
-	  if (this->map[y][x] != -42 && this->map[y][x] <= 0)
+	  if (this->map[y][x] != ReachArea::noValue && this->map[y][x] <= 0)
 	    c = 'X';
 	  if (y > 0 && this->map[y][x] == 0 && this->mapB[y - 1][x] != 0)
 	    c = '.';
 	  if (y == this->start.y && x == this->start.x)
 	    c = 'O';
-	  //   if (this->map[y][x] != -42)
-	  //   c = 'X';
 	  std::cout << c;
         }
       std::cout << std::endl;
     } 
 }
 
-bool			ReachArea::creatReach(const t_ptn &start, char **map,
-					      unsigned int size)
+bool			ReachArea::creatReach(const t_ptn &start, const Space &space)
 {
-  if (this->size != size)
-    {
-      this->size = size;
-      if (this->allocMap() == false)
-	return (false);
-    }
-  this->size = size;
+  this->h = space.getHeight();
+  this->w = space.getWidth();
+  if (this->allocMap() == false)
+    return (false);
   this->start = start;
-  this->mapB = (char **)map;
+  this->mapB = (char **)space.getMap();
 
   this->empty = false;
   this->creatReachF();
@@ -99,8 +97,8 @@ bool			ReachArea::creatReach(const t_ptn &start, char **map,
 
 bool			ReachArea::canGo(const t_ptn &ptn, const t_ptn &from) const
 {
-  if (ptn.x < 0 || ptn.x >= this->size ||
-      ptn.y < 0 || ptn.y >= this->size)
+  if (ptn.x < 0 || ptn.x >= this->w ||
+      ptn.y < 0 || ptn.y >= this->h)
     return (false);
   if (this->mapB[(int)(ptn.y)][(int)(ptn.x)] != 0)
     return (false);

@@ -1,6 +1,5 @@
 LVL 1
 
--Create ReachArea (at "this" ptn, which place I can reach)
 -Can joinde 2 reachArena (add and sub of some block in map)
 -Creat class Word, containe a map of Space and determ each path for deach Space.
 

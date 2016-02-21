@@ -3,30 +3,41 @@
 
 #include "ScaleImage.hpp"
 
-Space::Space(const t_ptn &pos)
+Space::Space(int w, int h)
 {
-  this->pos = pos;
+  this->w = w;
+  this->h = h;
   this->empty = true;
   this->map = NULL;
 }
 
 Space::~Space()
 {
-
+  this->freeSpace();
 }
 
 
+void			Space::freeSpace()
+{
+  if (this->map == NULL)
+    return ;
+  for (int y = 0; y < this->h; y += 1)
+    delete[] (this->map[y]);
+  delete[] (this->map);
+  this->map = NULL;
+  this->empty = true;
+}
+
 bool			Space::allocSpace()
 {
-  this->map = new char *[SPACE_SIZE];
+  this->freeSpace();
 
-  if (this->map == NULL)
-    return (false);
+  this->map = new char *[this->h];
 
-  for (int y = 0; y < SPACE_SIZE; y += 1)
+  for (int y = 0; y < this->h; y += 1)
     {
-      this->map[y] = new char[SPACE_SIZE];
-      for (int x = 0; x < SPACE_SIZE; x += 1)
+      this->map[y] = new char[this->w];
+      for (int x = 0; x < this->w; x += 1)
 	this->map[y][x] = 0;
     }
   return (true);
@@ -43,9 +54,9 @@ void			Space::print() const
   if (this->empty == true)
     return ;
 
-  for (int y = SPACE_SIZE - 1; y >= 0 ; y -= 1)
+  for (int y = this->h - 1; y >= 0 ; y -= 1)
     {
-      for (int x = 0; x < SPACE_SIZE; x += 1)
+      for (int x = 0; x < this->w; x += 1)
 	{
 	  char	c = '.';
 
@@ -60,42 +71,39 @@ void			Space::print() const
 bool			Space::generate(int seed)
 {
   double		v;
-  ScaleImage<char>	img(SPACE_SIZE, SPACE_SIZE);
+  ScaleImage<char>	img(this->w, this->h);
 
-  if (this->map == NULL)
-      if (this->allocSpace() == false)
-	return (false);
+  if (this->allocSpace() == false)
+    return (false);
 
   this->empty = false;
   initBruit3D(75, 6);
-  for (int y = 0; y < SPACE_SIZE; y += 1)
-    for (int x = 0; x < SPACE_SIZE; x += 1)
+
+  for (int y = 0; y < this->h; y += 1)
+    for (int x = 0; x < this->w; x += 1)
       {
 	v = bruit_coherent3D(x, y, seed, 10.);
 
 	if (v < 0)
-	  {
-	    img.setValueAt(x, y, 0);
-	    this->map[y][x] = img.valueAt(x, y);
-	  }
+	  img.setValueAt(x, y, 0);
 	else
-	  {
-	    img.setValueAt(x, y, 1);
-	    this->map[y][x] = img.valueAt(x, y);
-	  }
+	  img.setValueAt(x, y, 1);
       }
-  //this->print();
   img = img.opening(1);
 
-  for (int y = 0; y < SPACE_SIZE; y += 1)
-    for (int x = 0; x < SPACE_SIZE; x += 1)
+  for (int y = 0; y < this->h; y += 1)
+    for (int x = 0; x < this->w; x += 1)
       this->map[y][x] = img.valueAt(x, y);
 
-  //  this->print();
   return (true);
 }
 
 //GETTEUR SETTERS
+
+void			Space::setPos(const t_ptn &ptn)
+{
+  this->pos = ptn;
+}
 
 bool			Space::isEmpty() const
 {
@@ -115,4 +123,14 @@ char			**Space::getMap() const
 const std::list<Path>	&Space::getPathList() const
 {
   return (this->pathList);
+}
+
+int			Space::getWidth() const
+{
+  return (this->w);
+}
+
+int			Space::getHeight() const
+{
+  return (this->h);
 }

@@ -8,12 +8,16 @@ class ReachArea
 {
 
 public:
+
+  static const double	noValue;
+
+public:
   ReachArea();
-  ReachArea(const t_ptn &start, char **map, unsigned int size);
+  ReachArea(const t_ptn &start, const Space &space);
 
   ~ReachArea();
 
-  bool	creatReach(const t_ptn &start, char **map, unsigned int size);
+  bool	creatReach(const t_ptn &start, const Space &space);
 
   void	print() const;
 
@@ -32,7 +36,8 @@ private:
   double		**map;
   char			**mapB;
   bool			empty;
-  unsigned int		size;
+  int			h;
+  int			w;
 
 };
 

@@ -12,7 +12,7 @@
 int			main(int argc, char **argv)
 {
   int			seed = 1;
-  Space			space(t_ptn(0, 0, 0));
+  Space			space(45, 45);
   t_ptn			ptn1;
   t_ptn			ptn2;
 
@@ -24,8 +24,8 @@ int			main(int argc, char **argv)
   std::cout << space.generate(seed) << std::endl;
   space.print();
 
-  for (int x = 0; x < SPACE_SIZE; x += 1)
-    for (int y = SPACE_SIZE - 1; y > 0; y -= 1)
+  for (int x = 0; x < space.getWidth(); x += 1)
+    for (int y = space.getHeight() - 1; y > 0; y -= 1)
       if (space.getMap()[y][x] == 0 &&
 	  space.getMap()[y - 1][x] != 0)
 	{
@@ -35,8 +35,8 @@ int			main(int argc, char **argv)
 
  conti:
 
-  for (int x = SPACE_SIZE - 1; x >= 0; x -= 1)
-    for (int y = 1; y < SPACE_SIZE; y += 1)
+  for (int x = space.getWidth() - 1; x >= 0; x -= 1)
+    for (int y = 1; y < space.getHeight(); y += 1)
       if (space.getMap()[y][x] == 0 &&
 	  space.getMap()[y - 1][x] != 0)
 	{
@@ -45,11 +45,11 @@ int			main(int argc, char **argv)
 	}
  end:
 
-  ReachArea r1(ptn1, space.getMap(), SPACE_SIZE);
+  ReachArea r1(ptn1, space);
   std::cout << std::endl;
   r1.print();
 
-  ReachArea r2(ptn2, space.getMap(), SPACE_SIZE);
+  ReachArea r2(ptn2, space);
   std::cout << std::endl;
   r2.print();
 

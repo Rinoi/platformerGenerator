@@ -44,7 +44,7 @@ bool			ReachArea::allocMap()
       this->map[y] = new double[this->size];
 
       for (unsigned int x = 0; x < this->size; x += 1)
-        this->map[y][x] = -2;
+        this->map[y][x] = -42;
     }
   return (true);
 }
@@ -62,10 +62,16 @@ void			ReachArea::print() const
 
           if (this->mapB[y][x] != 0)
             c = 'T';
-	  if (this->map[y][x] != -2)
+	  if (this->map[y][x] != -42)
+	    c = '.';
+	  if (this->map[y][x] != -42 && this->map[y][x] <= 0)
+	    c = 'X';
+	  if (y > 0 && this->map[y][x] == 0 && this->mapB[y - 1][x] != 0)
 	    c = '.';
 	  if (y == this->start.y && x == this->start.x)
 	    c = 'O';
+	  //   if (this->map[y][x] != -42)
+	  //   c = 'X';
 	  std::cout << c;
         }
       std::cout << std::endl;
@@ -122,16 +128,18 @@ void			ReachArea::creatReachF()
 
       inAir = true;
 
-      if (ptn.z < 0.)
-	ptn.z = 0.5;
-
       if (ptn.y > 0 && this->mapB[(int)(ptn.y) - 1][(int)(ptn.x)] != 0)
 	{
 	  ptn.z = 0;
 	  inAir = false;
 	}
 
+      if (this->map[(int)(ptn.y)][(int)(ptn.x)] >= ptn.z)
+	continue;
       this->map[(int)(ptn.y)][(int)(ptn.x)] = ptn.z;
+
+      if (ptn.z < 0.)
+	ptn.z = 0.5;
 
       if (inAir == false)
 	{
@@ -145,7 +153,11 @@ void			ReachArea::creatReachF()
 	    stack.push(t_ptn(ptn.x - 1, ptn.y, ptn.z));
 	}
       else
-	{      
+	{
+	  if (ptn.z == 1)
+	    if (canGo(t_ptn(ptn.x, ptn.y + 1, 0), ptn) == true)
+	      stack.push(t_ptn(ptn.x, ptn.y + 1, 0));
+
 	  if (canGo(t_ptn(ptn.x, ptn.y - 1, ptn.z - 1), ptn) == true)
 	    stack.push(t_ptn(ptn.x, ptn.y - 1, ptn.z - 1));
 

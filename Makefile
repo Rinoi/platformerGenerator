@@ -9,9 +9,9 @@ SRC		=	src/main.cpp				\
 
 OBJ		=	$(SRC:.cpp=.o)
 
-CXX		=	g++ -std=c++11
+CXX		=	g++ -std=c++11 -g
 
-CXXFLAGS	=	-I./src -I./perlinNoise -W -Wall -Wextra
+CXXFLAGS	=	-I./src -I./perlinNoise -I./ScaleImage -W -Wall -Wextra
 
 all: $(NAME)
 

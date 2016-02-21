@@ -10,7 +10,7 @@
 class World;
 class ReachArena;
 
-#define SPACE_SIZE (25)
+#define SPACE_SIZE (45)
 
 class Space
 {

@@ -1,6 +1,8 @@
 #include "Space.hpp"
 #include "bruit.h"
 
+#include "ScaleImage.hpp"
+
 Space::Space(const t_ptn &pos)
 {
   this->pos = pos;
@@ -16,37 +18,18 @@ Space::~Space()
 
 bool			Space::allocSpace()
 {
-  int			y;
-
   this->map = new char *[SPACE_SIZE];
 
   if (this->map == NULL)
     return (false);
 
-  y = 0;
-  while (y < SPACE_SIZE)
+  for (int y = 0; y < SPACE_SIZE; y += 1)
     {
       this->map[y] = new char[SPACE_SIZE];
-      
-      if (this->map[y] == NULL)
-	goto free;
       for (int x = 0; x < SPACE_SIZE; x += 1)
 	this->map[y][x] = 0;
-      
-      y += 1;
     }
   return (true);
-
- free:
-  y -= 1;
-  while (y >= 0)
-    {
-      delete[] (this->map[y]);
-      y -= 1;
-    }
-  delete[] (this->map);
-  this->map = NULL;
-  return (false);
 }
 
 bool			Space::addPath(const Path &path)
@@ -77,23 +60,38 @@ void			Space::print() const
 bool			Space::generate(int seed)
 {
   double		v;
+  ScaleImage<char>	img(SPACE_SIZE, SPACE_SIZE);
 
   if (this->map == NULL)
       if (this->allocSpace() == false)
 	return (false);
 
-  initBruit3D(25, 5);
+  this->empty = false;
+  initBruit3D(75, 6);
   for (int y = 0; y < SPACE_SIZE; y += 1)
     for (int x = 0; x < SPACE_SIZE; x += 1)
       {
 	v = bruit_coherent3D(x, y, seed, 10.);
 
 	if (v < 0)
-	  this->map[y][x] = 0;
+	  {
+	    img.setValueAt(x, y, 0);
+	    this->map[y][x] = img.valueAt(x, y);
+	  }
 	else
-	  this->map[y][x] = 1;
+	  {
+	    img.setValueAt(x, y, 1);
+	    this->map[y][x] = img.valueAt(x, y);
+	  }
       }
-  this->empty = false;
+  //this->print();
+  img = img.opening(1);
+
+  for (int y = 0; y < SPACE_SIZE; y += 1)
+    for (int x = 0; x < SPACE_SIZE; x += 1)
+      this->map[y][x] = img.valueAt(x, y);
+
+  //  this->print();
   return (true);
 }
 

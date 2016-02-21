@@ -36,36 +36,17 @@ void			ReachArea::freeMap()
 
 bool			ReachArea::allocMap()
 {
-  unsigned int		y;
-
   this->freeMap();
-  this->map = new bool *[this->size];
-  if (this->map == NULL)
-    return (false);
+  this->map = new double *[this->size];
 
-  y = 0;
-  while (y < this->size)
+  for (unsigned int y = 0; y < this->size; y += 1)
     {
-      this->map[y] = new bool[this->size];
+      this->map[y] = new double[this->size];
 
-      if (this->map[y] == NULL)
-        goto free;
       for (unsigned int x = 0; x < this->size; x += 1)
-        this->map[y][x] = false;
-
-      y += 1;
+        this->map[y][x] = -2;
     }
   return (true);
-
- free:
-  while (y != 0)
-    {
-      delete[] (this->map[y - 1]);
-      y -= 1;
-    }
-  delete[] (this->map);
-  this->map = NULL;
-  return (false);
 }
 
 void			ReachArea::print() const
@@ -80,8 +61,10 @@ void			ReachArea::print() const
           char  c = ' ';
 
           if (this->mapB[y][x] != 0)
-            c = '|';
-	  if (this->map[y][x] == true)
+            c = 'T';
+	  if (this->map[y][x] != -2)
+	    c = '.';
+	  if (y == this->start.y && x == this->start.x)
 	    c = 'O';
 	  std::cout << c;
         }
@@ -110,78 +93,68 @@ bool			ReachArea::creatReach(const t_ptn &start, char **map,
 
 bool			ReachArea::canGo(const t_ptn &ptn, const t_ptn &from) const
 {
-  bool			startInAir = false;
-
   if (ptn.x < 0 || ptn.x >= this->size ||
       ptn.y < 0 || ptn.y >= this->size)
     return (false);
   if (this->mapB[(int)(ptn.y)][(int)(ptn.x)] != 0)
     return (false);
 
-  if (from.y - 1 < 0 || this->mapB[(int)(from.y - 1)][(int)(from.x)] == 0)
-    startInAir = true;
-
-  if (ptn.y > from.y && from.z != 0. && startInAir == false)
+  if (this->map[(int)(ptn.y)][(int)(ptn.x)] >= ptn.z)
     return (false);
 
-  if (startInAir == true)
-    {
-      if (ptn.y >= from.y)
-	return (false);
-      else
-	return (true);
-    }
+  if (ptn.z < 0 && ptn.y >= from.y)
+    return (false);
 
   return (true);
 }
 
 void			ReachArea::creatReachF()
 {
+  std::stack<t_ptn>	stack;
   t_ptn			ptn;
-  t_ptn			from;
-  double		g;
-  std::stack< std::pair<t_ptn, t_ptn> >
-    stack;
+  bool			inAir = true;
 
-  stack.push(std::pair<t_ptn, t_ptn>(t_ptn(this->start.x + 1, this->start.y, this->start.z),
-				     this->start));
+  stack.push(this->start);
   while (stack.empty() == false)
     {
-      ptn = stack.top().first;
-      from = stack.top().second;
+      ptn = stack.top();
       stack.pop();
 
+      inAir = true;
 
-      this->map[(int)(ptn.y)][(int)(ptn.x)] = true;
+      if (ptn.z < 0.)
+	ptn.z = 0.5;
 
-      std::cout << std::endl;
-      this->print();
+      if (ptn.y > 0 && this->mapB[(int)(ptn.y) - 1][(int)(ptn.x)] != 0)
+	{
+	  ptn.z = 0;
+	  inAir = false;
+	}
 
-      if (ptn.y < 0 || this->mapB[(int)(ptn.y) - 1][(int)(ptn.x)] == 0)
-	g = -1;
+      this->map[(int)(ptn.y)][(int)(ptn.x)] = ptn.z;
+
+      if (inAir == false)
+	{
+	  if (canGo(t_ptn(ptn.x, ptn.y + 1, 1), ptn) == true)
+	    stack.push(t_ptn(ptn.x, ptn.y + 1, 1));
+
+	  if (canGo(t_ptn(ptn.x + 1, ptn.y, ptn.z), ptn) == true)
+	    stack.push(t_ptn(ptn.x + 1, ptn.y, ptn.z));
+
+	  if (canGo(t_ptn(ptn.x - 1, ptn.y, ptn.z), ptn) == true)
+	    stack.push(t_ptn(ptn.x - 1, ptn.y, ptn.z));
+	}
       else
-	g = 0;
+	{      
+	  if (canGo(t_ptn(ptn.x, ptn.y - 1, ptn.z - 1), ptn) == true)
+	    stack.push(t_ptn(ptn.x, ptn.y - 1, ptn.z - 1));
 
-      if (canGo(t_ptn(ptn.x, ptn.y + 1, ptn.z), from) == true &&
-	  this->map[(int)ptn.y + 1][(int)(ptn.x)] == false)
-	stack.push(std::pair<t_ptn, t_ptn>(t_ptn(ptn.x, ptn.y + 1, 1),
-					   ptn));
+	  if (canGo(t_ptn(ptn.x + 1, ptn.y, ptn.z - 0.5), ptn) == true)
+	    stack.push(t_ptn(ptn.x + 1, ptn.y, ptn.z - 0.5));
 
-      if (canGo(t_ptn(ptn.x, ptn.y - 1, ptn.z), from) == true &&
-	  this->map[(int)ptn.y - 1][(int)(ptn.x)] == false)
-	stack.push(std::pair<t_ptn, t_ptn>(t_ptn(ptn.x, ptn.y - 1, g),
-					   ptn));
-
-      if (canGo(t_ptn(ptn.x + 1, ptn.y, ptn.z), from) == true &&
-	  this->map[(int)ptn.y][(int)(ptn.x + 1)] == false)
-	  stack.push(std::pair<t_ptn, t_ptn>(t_ptn(ptn.x + 1, ptn.y, g),
-					     ptn));
-
-      if (canGo(t_ptn(ptn.x - 1, ptn.y, ptn.z), from) == true &&
-	  this->map[(int)ptn.y][(int)(ptn.x - 1)] == false)
-	stack.push(std::pair<t_ptn, t_ptn>(t_ptn(ptn.x - 1, ptn.y, g),
-					   ptn));
-
+	  if (canGo(t_ptn(ptn.x - 1, ptn.y, ptn.z - 0.5), ptn) == true)
+	    stack.push(t_ptn(ptn.x - 1, ptn.y, ptn.z - 0.5));
+	}
     }
 
 }

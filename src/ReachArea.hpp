@@ -29,7 +29,7 @@ private:
 private:
 
   t_ptn			start;
-  bool			**map;
+  double		**map;
   char			**mapB;
   bool			empty;
   unsigned int		size;
